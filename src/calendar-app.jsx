@@ -1384,7 +1384,7 @@ const saveTopNote = (val) => {
                  style={{width:32,height:32,borderRadius:'50%'}}
                  title={user.email}
                />
-               <button onClick={signOut} style={{...S.ghostBtn,fontSize:12}}>
+               <button onClick={signOutUser} style={{...S.ghostBtn,fontSize:12}}>
                  로그아웃
                </button>
              </div>
