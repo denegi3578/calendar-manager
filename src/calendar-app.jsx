@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { auth, db } from './firebase'; // 우리가 만든 설정 파일
 // 👇 여기가 핵심: 최신 도구들을 가져옵니다
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
@@ -98,7 +98,7 @@ export default function App() {
         return {
           ...s,
           lists: {
-            order: (s.lists?.order || []).filter(l => l !== "FAIL_LIST"), // FAIL_LIST 문자열로 처리하거나 상수가 있다면 그대로 사용
+            order: (s.lists?.order || []).filter(l => l !== FAIL_LIST), // FAIL_LIST 문자열로 처리하거나 상수가 있다면 그대로 사용
             colors: { ...(s.lists?.colors || {}) }
           },
           plan: s.plan || {},
@@ -166,7 +166,7 @@ export default function App() {
           ...prev,
           ...data,
           lists: {
-            order: (data.lists?.order || prev.lists.order).filter(l => l !== "FAIL_LIST"),
+            order: (data.lists?.order || prev.lists.order).filter(l => l !== FAIL_LIST),
             colors: { ...(prev.lists.colors || {}), ...(data.lists?.colors || {}) }
           }
         }));
@@ -1863,6 +1863,34 @@ function PlanCanvas({ ymd, store, setStore, colorOf }){
     </>
   );
 }
+function PlanTaskRow({ t, ymd, addBlock, saveDetails, colorOf }) {
+  const [start, setStart] = useState(t.time || "");
+  const [dur, setDur] = useState(t.estimateMin || 60);
+
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"1fr 100px 90px auto",gap:8,alignItems:"center"}}>
+      <div style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+        <span style={{fontWeight:700}}>{t.text}</span>{" "}
+        <span style={{fontSize:12,color:"#64748b"}}>({t.list})</span>
+      </div>
+
+      <input type="time" value={start} onChange={e=>setStart(e.target.value)} style={S.timeInput}/>
+      <input type="number" min={5} step={5} value={dur} onChange={e=>setDur(+e.target.value||0)} style={S.textInput}/>
+
+      <button
+        style={S.secondaryBtn}
+        onClick={() => {
+          if (!/^\d{2}:\d{2}$/.test(start)) return alert("HH:MM");
+          const end = addMin(start, dur || 60);
+          addBlock({ text: t.text, start, end, color: colorOf(t.list), list: t.list, fromTaskId: t.id });
+          saveDetails(t.list, t.id, ymd, { time: start, estimateMin: dur || 60 });
+        }}
+      >
+        배치
+      </button>
+    </div>
+  );
+}
 function PlanPanel({ ymd, store, setStore, colorOf, lists, saveDetails }){
   const tasks = (()=> {
     const dd=store.dates[ymd]?.tasks || {};
@@ -1887,25 +1915,16 @@ function PlanPanel({ ymd, store, setStore, colorOf, lists, saveDetails }){
 
         <div style={{display:"grid",gap:8}}>
           {tasks.length===0 && <div style={S.empty}>오늘 할 일이 없어</div>}
-          {tasks.map(t=>{
-            const [start,setStart]=useState(t.time||"");
-            const [dur,setDur]=useState(t.estimateMin||60);
-            return (
-              <div key={t.id} style={{display:"grid",gridTemplateColumns:"1fr 100px 90px auto",gap:8,alignItems:"center"}}>
-                <div style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                  <span style={{fontWeight:700}}>{t.text}</span> <span style={{fontSize:12,color:"#64748b"}}>({t.list})</span>
-                </div>
-                <input type="time" value={start} onChange={e=>setStart(e.target.value)} style={S.timeInput}/>
-                <input type="number" min={5} step={5} value={dur} onChange={e=>setDur(+e.target.value||0)} style={S.textInput}/>
-                <button style={S.secondaryBtn} onClick={()=>{
-                  if(!isHHMM(start)) return alert("HH:MM");
-                  const end=addMin(start, dur||60);
-                  addBlock({ text:t.text, start, end, color:colorOf(t.list), list:t.list, fromTaskId:t.id });
-                  saveDetails(t.list, t.id, ymd, { time:start, estimateMin:dur||60 });
-                }}>배치</button>
-              </div>
-            );
-          })}
+          {tasks.map(t => (
+            <PlanTaskRow
+            key={t.id}
+            t={t}
+            ymd={ymd}
+            addBlock={addBlock}
+            saveDetails={saveDetails}
+            colorOf={colorOf}
+          />
+        ))}
         </div>
 
         <hr/>
