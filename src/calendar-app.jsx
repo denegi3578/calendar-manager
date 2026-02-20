@@ -1,3 +1,4 @@
+import { GoogleAuthProvider } from "firebase/auth";
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { auth, db } from './firebase'; // 우리가 만든 설정 파일
 // 👇 여기가 핵심: 최신 도구들을 가져옵니다
