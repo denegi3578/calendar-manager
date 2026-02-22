@@ -1814,19 +1814,6 @@ const saveTopNote = (val) => {
     });
   }
 
-  // function getDayPreview(ymd){
-  //   const dd=store.dates[ymd];
-  //   if (!dd) return [];
-    
-  //   // ✅ 모든 항목 표시 (FAIL_LIST만 제외)
-  //   // 완료됐거나 삭제 기록이 있어도 달력에는 계속 보임
-  //   return Object.entries(dd.tasks||{})
-  //     .flatMap(([list,arr])=>
-  //       (arr||[])
-  //         .filter(t=>list!==FAIL_LIST)
-  //         .map(t=>({text:t.text,list,done:t.done,deleted:t.deleted}))
-  //     );
-  // }
 
   function getDayPreview(ymd, includeFailed = false) {
   const dd = store.dates[ymd];
@@ -2204,6 +2191,11 @@ weekdayBtnActive: {
         opacity: 1;
         transform: scale(1) translateY(0);
       }
+    }
+    @keyframes failPulse {
+      0%   { box-shadow: 0 0 0 2px rgba(239,68,68,0.10), 0 0 10px rgba(239,68,68,0.18); }
+      50%  { box-shadow: 0 0 0 2px rgba(239,68,68,0.22), 0 0 26px rgba(239,68,68,0.42); }
+      100% { box-shadow: 0 0 0 2px rgba(239,68,68,0.10), 0 0 10px rgba(239,68,68,0.18); }
     }
   `;
   const s=document.createElement("style"); s.innerHTML=css; document.head.appendChild(s);

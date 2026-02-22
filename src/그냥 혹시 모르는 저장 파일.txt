@@ -1409,18 +1409,34 @@ const saveTopNote = (val) => {
          ) : (
            <>
              <div style={S.weekHead}>{weekdayNames.map(w=><div key={w} style={S.weekCell}>{w}</div>)}</div>
-             <div style={S.grid}>
-  {grid.map((d, i)=>{
-    const ymd=toYMD(d);
-    const items = getDayPreview(ymd);
-    const over = Math.max(0, items.length-5);
-    const active = ymd===selectedDate;
+             <div style={S.grid}> 
+  {grid.map((d, i)=> {
+    const ymd = toYMD(d);
+
+    const items = getDayPreview(ymd, showFailed); // ✅ 변경
+    const failCount = (store.dates[ymd]?.tasks?.[FAIL_LIST] || []).length; // ✅ 추가
+    const failGlow = showFailed && failCount > 0; // ✅ 추가
+
+    const over = Math.max(0, items.length - 5);
+    const active = ymd === selectedDate;
+
+    const baseStyle = {
+      ...S.dayCell,
+      ...(isTodayCell(d) ? S.dayToday : {}),
+      ...(active ? S.dayActive : { opacity: isThisMonth(d) ? 1 : 0.6 }),
+    };
+
+    if (failGlow) {
+      baseStyle.boxShadow = `${baseStyle.boxShadow}, 0 0 0 2px rgba(239,68,68,0.18), 0 0 22px rgba(239,68,68,0.22)`;
+      baseStyle.border = "1px solid rgba(239,68,68,0.35)";
+    }
+
     return (
       <button
         key={i}
         onClick={()=>selectDate(d)}
         onDoubleClick={()=>quickAddAt(ymd)}
-        style={{
+        style={{ 
           ...S.dayCell,
           ...(isTodayCell(d)?S.dayToday:{}),
           ...(active?S.dayActive:{ opacity: isThisMonth(d)?1:0.6 })
@@ -1798,19 +1814,27 @@ const saveTopNote = (val) => {
     });
   }
 
-  function getDayPreview(ymd){
-    const dd=store.dates[ymd];
-    if (!dd) return [];
-    
-    // ✅ 모든 항목 표시 (FAIL_LIST만 제외)
-    // 완료됐거나 삭제 기록이 있어도 달력에는 계속 보임
-    return Object.entries(dd.tasks||{})
-      .flatMap(([list,arr])=>
-        (arr||[])
-          .filter(t=>list!==FAIL_LIST)
-          .map(t=>({text:t.text,list,done:t.done,deleted:t.deleted}))
-      );
-  }
+
+  function getDayPreview(ymd, includeFailed = false) {
+  const dd = store.dates[ymd];
+  if (!dd) return [];
+
+  return Object.entries(dd.tasks || {})
+    .flatMap(([list, arr]) =>
+      (arr || [])
+        .filter(t => {
+          if (list === FAIL_LIST) return includeFailed; // ✅ 못함은 옵션일 때만
+          return true;
+        })
+        .map(t => ({
+          text: t.text,
+          list,
+          done: t.done,
+          deleted: t.deleted,
+          failed: list === FAIL_LIST || !!t.failed, // ✅ 표시용 플래그
+        }))
+    );
+}
 function PlanCanvas({ ymd, store, setStore, colorOf }){
   const d = parseYMD(ymd); const wd = d.getDay();
 
