@@ -1426,9 +1426,13 @@ const saveTopNote = (val) => {
       ...(active ? S.dayActive : { opacity: isThisMonth(d) ? 1 : 0.6 }),
     };
 
-    if (failGlow) {
-      baseStyle.boxShadow = `${baseStyle.boxShadow}, 0 0 0 2px rgba(239,68,68,0.18), 0 0 22px rgba(239,68,68,0.22)`;
-      baseStyle.border = "1px solid rgba(239,68,68,0.35)";
+     if (failGlow) {
+      const bs = baseStyle.boxShadow || "";
+      baseStyle.boxShadow =
+        (bs ? bs + ", " : "") +
+        "0 0 0 2px rgba(239,68,68,0.18), 0 0 22px rgba(239,68,68,0.35)";
+      baseStyle.border = "1px solid rgba(239,68,68,0.55)";
+      baseStyle.animation = "failPulse 1.4s ease-in-out infinite";
     }
 
     return (
