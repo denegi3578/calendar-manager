@@ -1414,7 +1414,8 @@ const saveTopNote = (val) => {
     const ymd = toYMD(d);
 
     const items = getDayPreview(ymd, showFailed); // ✅ 변경
-    const failCount = (store.dates[ymd]?.tasks?.[FAIL_LIST] || []).length; // ✅ 추가
+    const failArr = store.dates?.[ymd]?.tasks?.[FAIL_LIST] || [];
+    const failCount = failArr.length;
     const failGlow = showFailed && failCount > 0; // ✅ 추가
 
     const over = Math.max(0, items.length - 5);
@@ -1440,12 +1441,11 @@ const saveTopNote = (val) => {
         key={i}
         onClick={()=>selectDate(d)}
         onDoubleClick={()=>quickAddAt(ymd)}
-        style={{ 
-          ...S.dayCell,
-          ...(isTodayCell(d)?S.dayToday:{}),
-          ...(active?S.dayActive:{ opacity: isThisMonth(d)?1:0.6 })
-        }}
-        title={items.map(i2=>`${i2.list}: ${i2.text}${i2.done?" ✓":""}`).join("\n")}
+        style={baseStyle}
+        title={
+          (failCount ? `못함(${failCount})\n` + failArr.map(t=>t.text).join("\n") + "\n\n" : "")
+          + items.map(i2=>`${i2.list}: ${i2.text}${i2.done?" ✓":""}`).join("\n")
+        }
       >
         <div style={S.dayNum}>{d.getDate()}</div>
         <div style={S.pillsWrap}>
