@@ -2197,9 +2197,9 @@ weekdayBtnActive: {
       }
     }
     @keyframes failPulse {
-      0%   { box-shadow: 0 0 0 2px rgba(239,68,68,0.10), 0 0 10px rgba(239,68,68,0.18); }
-      50%  { box-shadow: 0 0 0 2px rgba(239,68,68,0.22), 0 0 26px rgba(239,68,68,0.42); }
-      100% { box-shadow: 0 0 0 2px rgba(239,68,68,0.10), 0 0 10px rgba(239,68,68,0.18); }
+      0%   { filter: saturate(1); }
+      50%  { filter: saturate(1.2); }
+      100% { filter: saturate(1); }
     }
   `;
   const s=document.createElement("style"); s.innerHTML=css; document.head.appendChild(s);
