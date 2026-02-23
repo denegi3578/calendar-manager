@@ -4,6 +4,21 @@ import { auth, db } from './firebase'; // 우리가 만든 설정 파일
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
+//
+import { initializeApp } from "firebase/app";
+import { initializeFirestore } from "firebase/firestore"; // ✅ 바꿈
+import { getAuth } from "firebase/auth";
+
+const app = initializeApp(firebaseConfig);
+
+// ✅ getFirestore(app) 대신 이걸로
+export const db = initializeFirestore(app, {
+  ignoreUndefinedProperties: true,
+});
+
+export const auth = getAuth(app);
+//
+
 /* ===== 날짜/유틸 ===== */
 const pad = (n) => String(n).padStart(2, "0");
 const toYMD = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
